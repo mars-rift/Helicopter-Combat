@@ -1,3 +1,0 @@
-C:/Users/cola/source/repos/Helicopter Combat/build/CMakeFiles/HelicopterCombat.dir
-C:/Users/cola/source/repos/Helicopter Combat/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/cola/source/repos/Helicopter Combat/build/CMakeFiles/ZERO_CHECK.dir
