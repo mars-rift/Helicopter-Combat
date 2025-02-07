@@ -1,27 +1,35 @@
-﻿#include "Helicopter.h"
+﻿#include "HelicopterCombat.h"
 #include <iostream>
 
-Helicopter::Helicopter(const std::string& name) : name(name), health(100) {}
-
-void Helicopter::attack(const std::string& target) {
-    std::cout << name << " is attacking " << target << "!\n";
-    // Implement attack logic
+void HelicopterCombat::run() {
+    int choice;
+    do {
+        showMainMenu();
+        std::cin >> choice;
+        handleUserInput(choice);
+    } while (choice != 0);
 }
 
-void Helicopter::addWeapon(const Weapon& weapon) {
-    weapons.push_back(weapon);
+void HelicopterCombat::showMainMenu() {
+    std::cout << "1. Start Game\n";
+    std::cout << "2. Show Game Status\n";
+    std::cout << "0. Exit\n";
+    std::cout << "Enter your choice: ";
 }
 
-void Helicopter::showStatus() const {
-    std::cout << "Helicopter: " << name << "\nHealth: " << health << "\n";
-    for (const auto& weapon : weapons) {
-        std::cout << "Weapon: " << weapon.getName() << "\n";
+void HelicopterCombat::handleUserInput(int choice) {
+    switch (choice) {
+    case 1:
+        game.start();
+        break;
+    case 2:
+        game.showStatus();
+        break;
+    case 0:
+        std::cout << "Exiting game...\n";
+        break;
+    default:
+        std::cout << "Invalid choice. Try again.\n";
+        break;
     }
-}
-#include "Game.h"
-
-int main() {
-    Game game;
-    game.start();
-    return 0;
 }

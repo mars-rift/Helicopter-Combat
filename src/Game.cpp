@@ -1,11 +1,9 @@
 #include "Game.h"
-#include "Weapon.h"
-#include "Enemy.h"
 #include <iostream>
 
 Game::Game() : helicopter("AH-1Z Viper") {
-    helicopter.addWeapon(Weapon("AIM-9M Missile", 40, 60)); // Provide minDamage and maxDamage
-    helicopter.addWeapon(Weapon("Precision Rocket", 20, 40)); // Provide minDamage and maxDamage
+    helicopter.addWeapon(Weapon("AIM-9M Missile", 40, 60));
+    helicopter.addWeapon(Weapon("Precision Rocket", 20, 40));
     enemies.push_back(Enemy("Drone", 50));
     enemies.push_back(Enemy("Tank", 100));
 }
@@ -40,7 +38,7 @@ void Game::handleInput(int choice) {
         }
         break;
     case 2:
-        helicopter.showStatus();
+        showStatus();
         break;
     case 0:
         std::cout << "Exiting game...\n";
@@ -48,5 +46,14 @@ void Game::handleInput(int choice) {
     default:
         std::cout << "Invalid choice. Try again.\n";
         break;
+    }
+}
+
+void Game::showStatus() {
+    std::cout << "Helicopter Status:" << std::endl;
+    helicopter.showStatus();
+    std::cout << "Enemies Status:" << std::endl;
+    for (const auto& enemy : enemies) {
+        std::cout << "Type: " << enemy.getType() << ", Health: " << enemy.getHealth() << std::endl;
     }
 }

@@ -3,6 +3,8 @@
 
 Helicopter::Helicopter(const std::string& name) : name(name), health(100) {}
 
+Helicopter::Helicopter() : name("Default Helicopter"), health(100) {}
+
 void Helicopter::attack(Enemy& target) {
     if (weapons.empty()) {
         std::cout << name << " has no weapons to attack " << target.getType() << "!" << std::endl;
@@ -13,7 +15,6 @@ void Helicopter::attack(Enemy& target) {
         int damage = weapon.getDamage();
         std::cout << name << " attacks " << target.getType() << " with " << weapon.getName() << " causing " << damage << " damage." << std::endl;
         target.takeDamage(damage);
-        damageTable.push_back({ weapon.getName(), damage });
     }
 }
 
@@ -27,11 +28,4 @@ void Helicopter::showStatus() const {
         std::cout << weapon.getName() << " ";
     }
     std::cout << std::endl;
-}
-
-void Helicopter::printDamageTable() const {
-    std::cout << "Damage Table:" << std::endl;
-    for (const auto& entry : damageTable) {
-        std::cout << "Weapon: " << entry.first << ", Damage: " << entry.second << std::endl;
-    }
 }

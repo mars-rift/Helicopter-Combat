@@ -1,6 +1,7 @@
 #pragma once
 #include "Helicopter.h"
 #include "Enemy.h"
+#include <vector>
 
 class Game {
 public:
@@ -8,6 +9,7 @@ public:
     void start();
     void showMenu();
     void handleInput(int choice);
+    void showStatus();
 
 private:
     Helicopter helicopter;

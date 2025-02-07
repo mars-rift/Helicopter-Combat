@@ -1,7 +1,9 @@
 #include "Weapon.h"
 
 Weapon::Weapon(const std::string& name, int minDamage, int maxDamage)
-    : name(name), minDamage(minDamage), maxDamage(maxDamage), rng(std::random_device{}()), dist(minDamage, maxDamage) {
+    : name(name), minDamage(minDamage), maxDamage(maxDamage), dist(minDamage, maxDamage) {
+    std::random_device rd;
+    rng.seed(rd());
 }
 
 std::string Weapon::getName() const {

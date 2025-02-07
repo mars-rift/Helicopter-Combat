@@ -1,17 +1,12 @@
 ﻿#pragma once
-#include <string>
-#include <vector>
-#include "Weapon.h"
+#include "Game.h"
 
-class Helicopter {
+class HelicopterCombat {
 public:
-    Helicopter(const std::string& name);
-    void attack(const std::string& target);
-    void addWeapon(const Weapon& weapon);
-    void showStatus() const;
+    void run();
+    void showMainMenu();
+    void handleUserInput(int choice);
 
 private:
-    std::string name;
-    std::vector<Weapon> weapons;
-    int health;
+    Game game;
 };

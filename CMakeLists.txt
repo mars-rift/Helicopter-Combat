@@ -10,8 +10,8 @@ add_executable(HelicopterCombat
     src/Helicopter.cpp
     src/Weapon.cpp
     src/Enemy.cpp
-    src/Game.h
-    src/Helicopter.h
-    src/Weapon.h
-    src/Enemy.h
+    src/HelicopterCombat.cpp
 )
+
+# Include directories
+target_include_directories(HelicopterCombat PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
