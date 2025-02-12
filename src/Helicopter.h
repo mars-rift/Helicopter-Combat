@@ -9,6 +9,8 @@ public:
     Helicopter(const std::string& name);
     Helicopter();
     void attack(Enemy& target);
+    void takeDamage(int damage); // New method
+    bool isAlive() const; // New method
     void addWeapon(const Weapon& weapon);
     void showStatus() const;
 

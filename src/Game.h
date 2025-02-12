@@ -5,7 +5,7 @@
 
 class Game {
 public:
-    Game();
+    Game();  // This is the constructor declaration
     void start();
     void showMenu();
     void handleInput(int choice);

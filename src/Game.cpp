@@ -1,11 +1,20 @@
 #include "Game.h"
 #include <iostream>
 
+// This is the Game constructor implementation
 Game::Game() : helicopter("AH-1Z Viper") {
+    // Add different weapons
     helicopter.addWeapon(Weapon("AIM-9M Missile", 40, 60));
     helicopter.addWeapon(Weapon("Precision Rocket", 20, 40));
-    enemies.push_back(Enemy("Drone", 50));
-    enemies.push_back(Enemy("Tank", 100));
+    helicopter.addWeapon(Weapon("Machine Gun", 10, 25));    // New weapon
+    helicopter.addWeapon(Weapon("Air-to-Ground Missile", 30, 50));  // New weapon
+
+    // Create enemies
+    enemies.push_back(Enemy("Scout Drone", 30, 5, 15));     // Fast, weak enemy
+    enemies.push_back(Enemy("Attack Drone", 50, 10, 20));   // Standard drone
+    enemies.push_back(Enemy("Light Tank", 75, 15, 25));     // Medium enemy
+    enemies.push_back(Enemy("Heavy Tank", 100, 20, 35));    // Strong enemy
+    enemies.push_back(Enemy("SAM Site", 60, 25, 40));      // High damage, low health
 }
 
 void Game::start() {
@@ -28,8 +37,24 @@ void Game::handleInput(int choice) {
     switch (choice) {
     case 1:
         if (!enemies.empty()) {
+            // Player attacks enemy
             helicopter.attack(enemies[0]);
+
+            // Enemy counterattacks if still alive
+            if (enemies[0].getHealth() > 0) {
+                int enemyDamage = enemies[0].attackDamage();
+                std::cout << enemies[0].getType() << " counterattacks!" << std::endl;
+                helicopter.takeDamage(enemyDamage);
+
+                if (!helicopter.isAlive()) {
+                    std::cout << "Game Over! Your helicopter was destroyed!" << std::endl;
+                    exit(0);
+                }
+            }
+
+            // Remove defeated enemy
             if (enemies[0].getHealth() <= 0) {
+                std::cout << enemies[0].getType() << " was destroyed!" << std::endl;
                 enemies.erase(enemies.begin());
             }
         }
