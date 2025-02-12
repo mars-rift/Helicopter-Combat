@@ -9,6 +9,7 @@ public:
     Helicopter(const std::string& name);
     Helicopter();
     void attack(Enemy& target);
+    void attackRandomEnemy(std::vector<Enemy>& enemies); // New method
     void takeDamage(int damage); // New method
     bool isAlive() const; // New method
     void addWeapon(const Weapon& weapon);

@@ -1,5 +1,6 @@
 #include "Helicopter.h"
 #include <iostream>
+#include <random>
 
 Helicopter::Helicopter(const std::string& name) : name(name), health(100) {}
 
@@ -15,6 +16,26 @@ void Helicopter::attack(Enemy& target) {
         int damage = weapon.getDamage();
         std::cout << name << " attacks " << target.getType() << " with " << weapon.getName() << " causing " << damage << " damage." << std::endl;
         target.takeDamage(damage);
+    }
+}
+
+void Helicopter::attackRandomEnemy(std::vector<Enemy>& enemies) {
+    if (enemies.empty()) {
+        std::cout << "No enemies left to attack!\n";
+        return;
+    }
+
+    std::random_device rd;
+    std::mt19937 rng(rd());
+    std::uniform_int_distribution<int> dist(0, enemies.size() - 1);
+    int randomIndex = dist(rng);
+
+    attack(enemies[randomIndex]);
+
+    // Remove defeated enemy
+    if (enemies[randomIndex].getHealth() <= 0) {
+        std::cout << enemies[randomIndex].getType() << " was destroyed!" << std::endl;
+        enemies.erase(enemies.begin() + randomIndex);
     }
 }
 

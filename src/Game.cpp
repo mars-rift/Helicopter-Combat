@@ -1,5 +1,5 @@
 #include "Game.h"
-#include <iostream>
+#include <iostream> // Include necessary header
 
 // This is the Game constructor implementation
 Game::Game() : helicopter("AH-1Z Viper") {
@@ -37,11 +37,11 @@ void Game::handleInput(int choice) {
     switch (choice) {
     case 1:
         if (!enemies.empty()) {
-            // Player attacks enemy
-            helicopter.attack(enemies[0]);
+            // Player attacks a random enemy
+            helicopter.attackRandomEnemy(enemies);
 
             // Enemy counterattacks if still alive
-            if (enemies[0].getHealth() > 0) {
+            if (!enemies.empty() && enemies[0].getHealth() > 0) {
                 int enemyDamage = enemies[0].attackDamage();
                 std::cout << enemies[0].getType() << " counterattacks!" << std::endl;
                 helicopter.takeDamage(enemyDamage);
@@ -50,12 +50,6 @@ void Game::handleInput(int choice) {
                     std::cout << "Game Over! Your helicopter was destroyed!" << std::endl;
                     exit(0);
                 }
-            }
-
-            // Remove defeated enemy
-            if (enemies[0].getHealth() <= 0) {
-                std::cout << enemies[0].getType() << " was destroyed!" << std::endl;
-                enemies.erase(enemies.begin());
             }
         }
         else {
@@ -82,3 +76,4 @@ void Game::showStatus() {
         std::cout << "Type: " << enemy.getType() << ", Health: " << enemy.getHealth() << std::endl;
     }
 }
+
