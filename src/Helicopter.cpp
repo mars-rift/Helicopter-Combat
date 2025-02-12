@@ -18,6 +18,16 @@ void Helicopter::attack(Enemy& target) {
     }
 }
 
+void Helicopter::takeDamage(int damage) {
+    health -= damage;
+    if (health < 0) health = 0;
+    std::cout << name << " takes " << damage << " damage! Health: " << health << std::endl;
+}
+
+bool Helicopter::isAlive() const {
+    return health > 0;
+}
+
 void Helicopter::addWeapon(const Weapon& weapon) {
     weapons.push_back(weapon);
 }
