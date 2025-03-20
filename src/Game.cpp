@@ -1,5 +1,6 @@
 #include "Game.h"
 #include <iostream> // Include necessary header
+#include <random> // Include random header
 
 // This is the Game constructor implementation
 Game::Game() : helicopter("AH-1Z Viper") {
@@ -37,18 +38,32 @@ void Game::handleInput(int choice) {
     switch (choice) {
     case 1:
         if (!enemies.empty()) {
-            // Player attacks a random enemy
-            helicopter.attackRandomEnemy(enemies);
+            // Select random enemy to attack
+            std::random_device rd;
+            std::mt19937 rng(rd());
+            std::uniform_int_distribution<int> dist(0, enemies.size() - 1);
+            int targetIndex = dist(rng);
+            Enemy& target = enemies[targetIndex];
+            
+            // Player attacks the selected enemy
+            int weaponIndex = selectWeapon();
+            if (weaponIndex >= 0) {
+                int damage = helicopter.attackWithWeapon(target, weaponIndex);
+                
+                // Enemy counterattacks if still alive
+                if (target.getHealth() > 0) {
+                    int enemyDamage = target.attackDamage();
+                    std::cout << target.getType() << " counterattacks!" << std::endl;
+                    helicopter.takeDamage(enemyDamage);
 
-            // Enemy counterattacks if still alive
-            if (!enemies.empty() && enemies[0].getHealth() > 0) {
-                int enemyDamage = enemies[0].attackDamage();
-                std::cout << enemies[0].getType() << " counterattacks!" << std::endl;
-                helicopter.takeDamage(enemyDamage);
-
-                if (!helicopter.isAlive()) {
-                    std::cout << "Game Over! Your helicopter was destroyed!" << std::endl;
-                    exit(0);
+                    if (!helicopter.isAlive()) {
+                        std::cout << "Game Over! Your helicopter was destroyed!" << std::endl;
+                        exit(0);
+                    }
+                } 
+                else {
+                    std::cout << target.getType() << " was destroyed!" << std::endl;
+                    enemies.erase(enemies.begin() + targetIndex);
                 }
             }
         }
@@ -66,6 +81,21 @@ void Game::handleInput(int choice) {
         std::cout << "Invalid choice. Try again.\n";
         break;
     }
+}
+
+// New method to let player choose a weapon
+int Game::selectWeapon() {
+    std::cout << "\nSelect weapon to use:" << std::endl;
+    helicopter.listWeapons();
+    std::cout << "0. Back" << std::endl;
+    
+    int choice;
+    std::cin >> choice;
+    
+    if (choice <= 0 || choice > helicopter.getWeaponCount()) {
+        return -1;
+    }
+    return choice - 1;
 }
 
 void Game::showStatus() {

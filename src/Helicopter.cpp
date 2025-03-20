@@ -60,3 +60,28 @@ void Helicopter::showStatus() const {
     }
     std::cout << std::endl;
 }
+
+int Helicopter::attackWithWeapon(Enemy& target, int weaponIndex) {
+    if (weaponIndex < 0 || weaponIndex >= weapons.size()) {
+        std::cout << "Invalid weapon selection." << std::endl;
+        return 0;
+    }
+    
+    const Weapon& weapon = weapons[weaponIndex];
+    int damage = weapon.getDamage();
+    std::cout << name << " attacks " << target.getType() 
+              << " with " << weapon.getName() 
+              << " causing " << damage << " damage." << std::endl;
+    target.takeDamage(damage);
+    return damage;
+}
+
+void Helicopter::listWeapons() const {
+    for (size_t i = 0; i < weapons.size(); i++) {
+        std::cout << (i+1) << ". " << weapons[i].getName() << std::endl;
+    }
+}
+
+int Helicopter::getWeaponCount() const {
+    return weapons.size();
+}

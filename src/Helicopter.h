@@ -14,6 +14,9 @@ public:
     bool isAlive() const; // New method
     void addWeapon(const Weapon& weapon);
     void showStatus() const;
+    int attackWithWeapon(Enemy& target, int weaponIndex);
+    void listWeapons() const;
+    int getWeaponCount() const;
 
 private:
     std::string name;

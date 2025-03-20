@@ -10,6 +10,7 @@ public:
     void showMenu();
     void handleInput(int choice);
     void showStatus();
+    int selectWeapon();
 
 private:
     Helicopter helicopter;
