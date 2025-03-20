@@ -48,7 +48,7 @@ void Game::handleInput(int choice) {
             // Player attacks the selected enemy
             int weaponIndex = selectWeapon();
             if (weaponIndex >= 0) {
-                int damage = helicopter.attackWithWeapon(target, weaponIndex);
+                helicopter.attackWithWeapon(target, weaponIndex);
                 
                 // Enemy counterattacks if still alive
                 if (target.getHealth() > 0) {
@@ -90,9 +90,20 @@ int Game::selectWeapon() {
     std::cout << "0. Back" << std::endl;
     
     int choice;
-    std::cin >> choice;
-    
-    if (choice <= 0 || choice > helicopter.getWeaponCount()) {
+    while (true) {
+        std::cin >> choice;
+        if (std::cin.fail() || choice < 0 || choice > helicopter.getWeaponCount()) {
+        std::cout << "Invalid choice. Please enter a number between 0 and " << helicopter.getWeaponCount() << ": ";
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // discard invalid input
+            std::cout << "Invalid choice. Please enter a number between 1 and " << helicopter.getWeaponCount() << ": ";
+        } else {
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // discard any extra input
+            break;
+        }
+    }
+
+    const int BACK_OPTION = 0;
+    if (choice == BACK_OPTION) {
         return -1;
     }
     return choice - 1;
