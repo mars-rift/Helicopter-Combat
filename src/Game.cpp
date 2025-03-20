@@ -41,7 +41,7 @@ void Game::handleInput(int choice) {
             // Select random enemy to attack
             std::random_device rd;
             std::mt19937 rng(rd());
-            std::uniform_int_distribution<int> dist(0, enemies.size() - 1);
+            std::uniform_int_distribution<int> dist(0, static_cast<int>(enemies.size()) - 1);
             int targetIndex = dist(rng);
             Enemy& target = enemies[targetIndex];
             

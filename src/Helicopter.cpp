@@ -1,6 +1,26 @@
-#include "Helicopter.h"
 #include <iostream>
 #include <random>
+#include "Helicopter.h"
+
+void Helicopter::attackRandomEnemy(std::vector<Enemy>& enemies) {
+    if (enemies.empty()) {
+        std::cout << "No enemies left to attack!\n";
+        return;
+    }
+
+    std::random_device rd;
+    std::mt19937 rng(rd());
+    std::uniform_int_distribution<int> dist(0, static_cast<int>(enemies.size()) - 1);
+    int randomIndex = dist(rng);
+
+    attack(enemies[randomIndex]);
+
+    // Remove defeated enemy
+    if (enemies[randomIndex].getHealth() <= 0) {
+        std::cout << enemies[randomIndex].getType() << " was destroyed!" << std::endl;
+        enemies.erase(enemies.begin() + randomIndex);
+    }
+}
 
 Helicopter::Helicopter(const std::string& name) : name(name), health(100) {}
 
@@ -16,26 +36,6 @@ void Helicopter::attack(Enemy& target) {
         int damage = weapon.getDamage();
         std::cout << name << " attacks " << target.getType() << " with " << weapon.getName() << " causing " << damage << " damage." << std::endl;
         target.takeDamage(damage);
-    }
-}
-
-void Helicopter::attackRandomEnemy(std::vector<Enemy>& enemies) {
-    if (enemies.empty()) {
-        std::cout << "No enemies left to attack!\n";
-        return;
-    }
-
-    std::random_device rd;
-    std::mt19937 rng(rd());
-    std::uniform_int_distribution<int> dist(0, enemies.size() - 1);
-    int randomIndex = dist(rng);
-
-    attack(enemies[randomIndex]);
-
-    // Remove defeated enemy
-    if (enemies[randomIndex].getHealth() <= 0) {
-        std::cout << enemies[randomIndex].getType() << " was destroyed!" << std::endl;
-        enemies.erase(enemies.begin() + randomIndex);
     }
 }
 
@@ -62,26 +62,26 @@ void Helicopter::showStatus() const {
 }
 
 int Helicopter::attackWithWeapon(Enemy& target, int weaponIndex) {
-    if (weaponIndex < 0 || weaponIndex >= weapons.size()) {
+    if (weaponIndex < 0 || weaponIndex >= static_cast<int>(weapons.size())) {
         std::cout << "Invalid weapon selection." << std::endl;
         return 0;
     }
-    
+
     const Weapon& weapon = weapons[weaponIndex];
     int damage = weapon.getDamage();
-    std::cout << name << " attacks " << target.getType() 
-              << " with " << weapon.getName() 
-              << " causing " << damage << " damage." << std::endl;
+    std::cout << name << " attacks " << target.getType()
+        << " with " << weapon.getName()
+        << " causing " << damage << " damage." << std::endl;
     target.takeDamage(damage);
     return damage;
 }
 
 void Helicopter::listWeapons() const {
     for (size_t i = 0; i < weapons.size(); i++) {
-        std::cout << (i+1) << ". " << weapons[i].getName() << std::endl;
+        std::cout << (i + 1) << ". " << weapons[i].getName() << std::endl;
     }
 }
 
 int Helicopter::getWeaponCount() const {
-    return weapons.size();
+    return static_cast<int>(weapons.size());
 }
