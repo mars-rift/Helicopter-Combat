@@ -58,12 +58,23 @@ void Game::handleInput(int choice) {
 
                     if (!helicopter.isAlive()) {
                         std::cout << "Game Over! Your helicopter was destroyed!" << std::endl;
+                        showStatus();
+                        std::cout << "MISSION FAILED" << std::endl;
                         exit(0);
                     }
                 } 
                 else {
                     std::cout << target.getType() << " was destroyed!" << std::endl;
                     enemies.erase(enemies.begin() + targetIndex);
+                    
+                    // Check if all enemies are defeated
+                    if (enemies.empty()) {
+                        std::cout << "\n=== VICTORY! All enemies have been defeated! ===\n" << std::endl;
+                        std::cout << "Final Status:" << std::endl;
+                        showStatus();
+                        std::cout << "\nMISSION COMPLETE!" << std::endl;
+                        exit(0);
+                    }
                 }
             }
         }
