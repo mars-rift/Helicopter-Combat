@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/HelicopterCombat.dir/src/main.cpp.o CMakeFiles/HelicopterCombat.dir/src/Game.cpp.o CMakeFiles/HelicopterCombat.dir/src/Helicopter.cpp.o CMakeFiles/HelicopterCombat.dir/src/Weapon.cpp.o CMakeFiles/HelicopterCombat.dir/src/Enemy.cpp.o CMakeFiles/HelicopterCombat.dir/src/HelicopterCombat.cpp.o  -o HelicopterCombat 

@@ -1,6 +1,8 @@
 #include "Game.h"
-#include <iostream> // Include necessary header
-#include <random> // Include random header
+#include <iostream>  // Include necessary header
+#include <random>    // Include random header
+#include <limits>    // For std::numeric_limits
+#include <cstdlib>   // For exit()
 
 // This is the Game constructor implementation
 Game::Game() : helicopter("AH-1Z Viper") {
@@ -19,12 +21,18 @@ Game::Game() : helicopter("AH-1Z Viper") {
 }
 
 void Game::start() {
-    int choice;
-    do {
-        showMenu();
-        std::cin >> choice;
-        handleInput(choice);
-    } while (choice != 0);
+    try {
+        int choice;
+        do {
+            showMenu();
+            std::cin >> choice;
+            handleInput(choice);
+        } while (choice != 0);
+    } catch (const std::exception& e) {
+        std::cerr << "Error occurred: " << e.what() << std::endl;
+    } catch (...) {
+        std::cerr << "Unknown error occurred" << std::endl;
+    }
 }
 
 void Game::showMenu() {
@@ -38,42 +46,41 @@ void Game::handleInput(int choice) {
     switch (choice) {
     case 1:
         if (!enemies.empty()) {
-            // Select random enemy to attack
-            std::random_device rd;
-            std::mt19937 rng(rd());
-            std::uniform_int_distribution<int> dist(0, static_cast<int>(enemies.size()) - 1);
-            int targetIndex = dist(rng);
-            Enemy& target = enemies[targetIndex];
-            
-            // Player attacks the selected enemy
-            int weaponIndex = selectWeapon();
-            if (weaponIndex >= 0) {
-                helicopter.attackWithWeapon(target, weaponIndex);
+            // Let player select enemy to attack
+            int targetIndex = selectEnemy();
+            if (targetIndex >= 0) {
+                Enemy& target = enemies[targetIndex];
                 
-                // Enemy counterattacks if still alive
-                if (target.getHealth() > 0) {
-                    int enemyDamage = target.attackDamage();
-                    std::cout << target.getType() << " counterattacks!" << std::endl;
-                    helicopter.takeDamage(enemyDamage);
-
-                    if (!helicopter.isAlive()) {
-                        std::cout << "Game Over! Your helicopter was destroyed!" << std::endl;
-                        showStatus();
-                        std::cout << "MISSION FAILED" << std::endl;
-                        exit(0);
-                    }
-                } 
-                else {
-                    std::cout << target.getType() << " was destroyed!" << std::endl;
-                    enemies.erase(enemies.begin() + targetIndex);
+                // Player attacks the selected enemy
+                int weaponIndex = selectWeapon();
+                if (weaponIndex >= 0) {
+                    helicopter.attackWithWeapon(target, weaponIndex);
                     
-                    // Check if all enemies are defeated
-                    if (enemies.empty()) {
-                        std::cout << "\n=== VICTORY! All enemies have been defeated! ===\n" << std::endl;
-                        std::cout << "Final Status:" << std::endl;
-                        showStatus();
-                        std::cout << "\nMISSION COMPLETE!" << std::endl;
-                        exit(0);
+                    // Enemy counterattacks if still alive
+                    if (target.getHealth() > 0) {
+                        int enemyDamage = target.attackDamage();
+                        std::cout << target.getType() << " counterattacks!" << std::endl;
+                        helicopter.takeDamage(enemyDamage);
+
+                        if (!helicopter.isAlive()) {
+                            std::cout << "Game Over! Your helicopter was destroyed!" << std::endl;
+                            showStatus();
+                            std::cout << "MISSION FAILED" << std::endl;
+                            exit(0);
+                        }
+                    } 
+                    else {
+                        std::cout << target.getType() << " was destroyed!" << std::endl;
+                        enemies.erase(enemies.begin() + targetIndex);
+                        
+                        // Check if all enemies are defeated
+                        if (enemies.empty()) {
+                            std::cout << "\n=== VICTORY! All enemies have been defeated! ===\n" << std::endl;
+                            std::cout << "Final Status:" << std::endl;
+                            showStatus();
+                            std::cout << "\nMISSION COMPLETE!" << std::endl;
+                            exit(0);
+                        }
                     }
                 }
             }
@@ -103,12 +110,17 @@ int Game::selectWeapon() {
     int choice;
     while (true) {
         std::cin >> choice;
-        if (std::cin.fail() || choice < 0 || choice > helicopter.getWeaponCount()) {
-        std::cout << "Invalid choice. Please enter a number between 0 and " << helicopter.getWeaponCount() << ": ";
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // discard invalid input
-            std::cout << "Invalid choice. Please enter a number between 1 and " << helicopter.getWeaponCount() << ": ";
+        if (std::cin.fail()) {
+            std::cin.clear(); // Clear error flag
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Invalid input. Please enter a number between 0 and " 
+                      << helicopter.getWeaponCount() << ": ";
+        } else if (choice < 0 || choice > helicopter.getWeaponCount()) {
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Invalid choice. Please enter a number between 0 and " 
+                      << helicopter.getWeaponCount() << ": ";
         } else {
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // discard any extra input
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             break;
         }
     }
@@ -127,5 +139,39 @@ void Game::showStatus() {
     for (const auto& enemy : enemies) {
         std::cout << "Type: " << enemy.getType() << ", Health: " << enemy.getHealth() << std::endl;
     }
+}
+
+// New method to select enemy target
+int Game::selectEnemy() {
+    std::cout << "\nSelect enemy to attack:" << std::endl;
+    for (size_t i = 0; i < enemies.size(); i++) {
+        std::cout << (i+1) << ". " << enemies[i].getType() 
+                  << " (Health: " << enemies[i].getHealth() << ")" << std::endl;
+    }
+    std::cout << "0. Back" << std::endl;
+    
+    int choice;
+    while (true) {
+        std::cin >> choice;
+        if (std::cin.fail()) {
+            std::cin.clear(); // Clear error flag
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Invalid input. Please enter a number between 0 and " 
+                      << enemies.size() << ": ";
+        } else if (choice < 0 || choice > static_cast<int>(enemies.size())) {
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Invalid choice. Please enter a number between 0 and " 
+                      << enemies.size() << ": ";
+        } else {
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            break;
+        }
+    }
+    
+    const int BACK_OPTION = 0;
+    if (choice == BACK_OPTION) {
+        return -1;
+    }
+    return choice - 1;
 }
 
