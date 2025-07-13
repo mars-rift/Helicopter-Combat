@@ -192,6 +192,26 @@ void Game::startMission(MissionType type) {
             missionName = "Operation Eagle Eye";
             briefing = "Conduct reconnaissance of enemy positions while maintaining stealth.";
             break;
+        case MissionType::ESCORT:
+            missionName = "Operation Safe Passage";
+            briefing = "Escort friendly convoy through hostile territory.";
+            break;
+        case MissionType::RESCUE:
+            missionName = "Operation Guardian Angel";
+            briefing = "Locate and extract downed personnel from enemy territory.";
+            break;
+        case MissionType::GROUND_SUPPORT:
+            missionName = "Operation Thunder Strike";
+            briefing = "Provide close air support for ground forces under fire.";
+            break;
+        case MissionType::SUPPLY_DROP:
+            missionName = "Operation Supply Line";
+            briefing = "Deliver critical supplies to isolated friendly units.";
+            break;
+        case MissionType::PATROL:
+            missionName = "Operation Watch Tower";
+            briefing = "Conduct routine patrol of the operational area.";
+            break;
         default:
             missionName = "Training Mission";
             briefing = "Basic training scenario to familiarize with systems.";
@@ -217,7 +237,7 @@ void Game::startMission(MissionType type) {
 
 void Game::enterFlightMode() {
     gameState = GameState::IN_FLIGHT;
-    std::cout << "\n🚁 Entering flight mode..." << std::endl;
+    std::cout << "\n>> Entering flight mode..." << std::endl;
     
     int choice;
     do {
@@ -304,8 +324,8 @@ void Game::performAttack(int enemyIndex, int weaponIndex) {
     if (enemyIndex >= 0 && enemyIndex < static_cast<int>(enemies.size()) &&
         weaponIndex >= 0 && weaponIndex < helicopter.getWeaponCount()) {
         
-        // Calculate distance to target
-        double distance = 3.0; // Simplified distance calculation
+        // Calculate actual distance to target
+        double distance = helicopter.calculateDistance(enemies[enemyIndex].getPosition());
         
         if (helicopter.attackWithWeapon(enemies[enemyIndex], weaponIndex, distance)) {
             if (enemies[enemyIndex].getHealth() <= 0) {
@@ -335,7 +355,7 @@ void Game::processEnemyTurn() {
             helicopter.takeDamage(damage);
             
             if (!helicopter.isAlive()) {
-                std::cout << "\n💥 HELICOPTER DESTROYED! MISSION FAILED!" << std::endl;
+                std::cout << "\n[!] HELICOPTER DESTROYED! MISSION FAILED!" << std::endl;
                 if (currentMission) {
                     currentMission->fail("Aircraft destroyed");
                 }
@@ -358,6 +378,46 @@ void Game::showNavigationMap() {
     std::cout << "Fuel: " << std::fixed << std::setprecision(0) 
               << helicopter.getFlightParams().fuel << " liters" << std::endl;
     std::cout << "Speed: " << helicopter.getFlightParams().speed << " km/h" << std::endl;
+    
+    // Show nearby contacts for reference
+    if (!enemies.empty()) {
+        std::cout << "\nNearby Contacts:" << std::endl;
+        for (size_t i = 0; i < std::min(enemies.size(), size_t(5)); ++i) {
+            double distance = helicopter.calculateDistance(enemies[i].getPosition());
+            double bearing = helicopter.calculateBearing(enemies[i].getPosition());
+            std::cout << "  " << (i + 1) << ". " << enemies[i].getType() 
+                      << " at " << std::fixed << std::setprecision(1) << distance 
+                      << "km, bearing " << std::fixed << std::setprecision(0) << bearing << " deg" << std::endl;
+        }
+    }
+    
+    std::cout << "\n=== MOVEMENT OPTIONS ===" << std::endl;
+    std::cout << "1. Move North (5km)" << std::endl;
+    std::cout << "2. Move South (5km)" << std::endl;
+    std::cout << "3. Move East (5km)" << std::endl;
+    std::cout << "4. Move West (5km)" << std::endl;
+    std::cout << "5. Move to Contact" << std::endl;
+    std::cout << "6. Set Custom Waypoint" << std::endl;
+    std::cout << "7. Change Altitude" << std::endl;
+    std::cout << "8. Adjust Speed" << std::endl;
+    std::cout << "0. Back to Flight Operations" << std::endl;
+    std::cout << "Enter your choice: ";
+    
+    int choice;
+    std::cin >> choice;
+    
+    switch (choice) {
+        case 1: moveHelicopter(0, 5); break;
+        case 2: moveHelicopter(0, -5); break;
+        case 3: moveHelicopter(5, 0); break;
+        case 4: moveHelicopter(-5, 0); break;
+        case 5: moveToContact(); break;
+        case 6: setCustomWaypoint(); break;
+        case 7: changeAltitude(); break;
+        case 8: adjustSpeed(); break;
+        case 0: return;
+        default: std::cout << "Invalid choice." << std::endl; break;
+    }
 }
 
 void Game::handleEmergency() {
@@ -509,5 +569,169 @@ std::string Game::formatDistance(double km) const {
         ss << std::fixed << std::setprecision(1) << km << "km";
         return ss.str();
     }
+}
+
+// Movement helper functions
+void Game::moveHelicopter(double deltaX, double deltaY) {
+    Position currentPos = helicopter.getPosition();
+    Position newPos(currentPos.x + deltaX, currentPos.y + deltaY, currentPos.altitude);
+    
+    // Calculate fuel consumption for movement
+    double distance = sqrt(deltaX * deltaX + deltaY * deltaY);
+    double fuelNeeded = distance * 2.0; // 2 liters per km
+    
+    if (helicopter.getFlightParams().fuel < fuelNeeded) {
+        std::cout << "Insufficient fuel for this movement!" << std::endl;
+        return;
+    }
+    
+    helicopter.setPosition(newPos);
+    helicopter.consumeFuel(fuelNeeded);
+    
+    std::cout << "Moved to position (" << std::fixed << std::setprecision(1) 
+              << newPos.x << ", " << newPos.y << ")" << std::endl;
+    std::cout << "Fuel consumed: " << std::fixed << std::setprecision(1) 
+              << fuelNeeded << " liters" << std::endl;
+              
+    // Advance time for movement
+    gameTime += distance * 60.0 / helicopter.getFlightParams().maxSpeed; // Time based on max speed
+}
+
+void Game::moveToContact() {
+    if (enemies.empty()) {
+        std::cout << "No contacts available to move towards." << std::endl;
+        return;
+    }
+    
+    std::cout << "\nSelect contact to move towards:" << std::endl;
+    for (size_t i = 0; i < std::min(enemies.size(), size_t(10)); ++i) {
+        double distance = helicopter.calculateDistance(enemies[i].getPosition());
+        std::cout << (i + 1) << ". " << enemies[i].getType() 
+                  << " (" << std::fixed << std::setprecision(1) << distance << "km)" << std::endl;
+    }
+    std::cout << "0. Cancel" << std::endl;
+    std::cout << "Enter choice: ";
+    
+    int choice;
+    std::cin >> choice;
+    
+    if (choice == 0 || choice > static_cast<int>(enemies.size())) {
+        return;
+    }
+    
+    Position enemyPos(enemies[choice - 1].getPosition().x, 
+                      enemies[choice - 1].getPosition().y,
+                      enemies[choice - 1].getPosition().altitude);
+    Position currentPos = helicopter.getPosition();
+    
+    // Move to within 2km of target for safety
+    double deltaX = enemyPos.x - currentPos.x;
+    double deltaY = enemyPos.y - currentPos.y;
+    double distance = sqrt(deltaX * deltaX + deltaY * deltaY);
+    
+    if (distance <= 2.0) {
+        std::cout << "Already within engagement range of target." << std::endl;
+        return;
+    }
+    
+    // Calculate position 2km away from target
+    double ratio = (distance - 2.0) / distance;
+    deltaX *= ratio;
+    deltaY *= ratio;
+    
+    moveHelicopter(deltaX, deltaY);
+}
+
+void Game::setCustomWaypoint() {
+    double x, y;
+    std::cout << "Enter X coordinate: ";
+    std::cin >> x;
+    std::cout << "Enter Y coordinate: ";
+    std::cin >> y;
+    
+    Position currentPos = helicopter.getPosition();
+    double deltaX = x - currentPos.x;
+    double deltaY = y - currentPos.y;
+    
+    moveHelicopter(deltaX, deltaY);
+}
+
+void Game::changeAltitude() {
+    std::cout << "\nCurrent altitude: " << helicopter.getPosition().altitude << "m" << std::endl;
+    std::cout << "1. Increase altitude (+50m)" << std::endl;
+    std::cout << "2. Decrease altitude (-50m)" << std::endl;
+    std::cout << "3. Set specific altitude" << std::endl;
+    std::cout << "0. Cancel" << std::endl;
+    std::cout << "Enter choice: ";
+    
+    int choice;
+    std::cin >> choice;
+    
+    Position currentPos = helicopter.getPosition();
+    Position newPos = currentPos;
+    
+    switch (choice) {
+        case 1:
+            newPos.altitude = std::min(currentPos.altitude + 50, 3000.0);
+            break;
+        case 2:
+            newPos.altitude = std::max(currentPos.altitude - 50, 10.0);
+            break;
+        case 3:
+            std::cout << "Enter altitude (10-3000m): ";
+            std::cin >> newPos.altitude;
+            newPos.altitude = std::max(10.0, std::min(newPos.altitude, 3000.0));
+            break;
+        case 0:
+            return;
+        default:
+            std::cout << "Invalid choice." << std::endl;
+            return;
+    }
+    
+    helicopter.setPosition(newPos);
+    std::cout << "Altitude changed to " << newPos.altitude << "m" << std::endl;
+}
+
+void Game::adjustSpeed() {
+    std::cout << "\nCurrent speed: " << helicopter.getFlightParams().speed << " km/h" << std::endl;
+    std::cout << "1. Increase speed (+50 km/h)" << std::endl;
+    std::cout << "2. Decrease speed (-50 km/h)" << std::endl;
+    std::cout << "3. Set cruise speed (150 km/h)" << std::endl;
+    std::cout << "4. Set maximum speed" << std::endl;
+    std::cout << "5. Hover (0 km/h)" << std::endl;
+    std::cout << "0. Cancel" << std::endl;
+    std::cout << "Enter choice: ";
+    
+    int choice;
+    std::cin >> choice;
+    
+    FlightParams params = helicopter.getFlightParams();
+    
+    switch (choice) {
+        case 1:
+            params.speed = std::min(params.speed + 50, params.maxSpeed);
+            break;
+        case 2:
+            params.speed = std::max(params.speed - 50, 0.0);
+            break;
+        case 3:
+            params.speed = 150.0;
+            break;
+        case 4:
+            params.speed = params.maxSpeed;
+            break;
+        case 5:
+            params.speed = 0.0;
+            break;
+        case 0:
+            return;
+        default:
+            std::cout << "Invalid choice." << std::endl;
+            return;
+    }
+    
+    helicopter.setFlightParams(params);
+    std::cout << "Speed set to " << params.speed << " km/h" << std::endl;
 }
 

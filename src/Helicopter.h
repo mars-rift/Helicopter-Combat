@@ -91,6 +91,15 @@ public:
     const HelicopterSystems& getSystems() const { return systems; }
     double getHealth() const { return health; }
     std::string getName() const { return name; }
+    
+    // Setters for movement
+    void setPosition(const Position& newPos) { position = newPos; }
+    void setFlightParams(const FlightParams& params) { flightParams = params; }
+    void consumeFuel(double amount) { flightParams.fuel = std::max(0.0, flightParams.fuel - amount); }
+    
+    // Utility methods for navigation
+    double calculateDistance(const EnemyPosition& enemyPos) const;
+    double calculateBearing(const EnemyPosition& enemyPos) const;
 
 private:
     // Core attributes

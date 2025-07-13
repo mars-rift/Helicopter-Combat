@@ -1,6 +1,7 @@
 #include "Environment.h"
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 
 Environment::Environment() 
     : currentWeather(WeatherCondition::CLEAR), weatherDuration(60.0), 
@@ -278,13 +279,13 @@ void Environment::showEnvironmentalStatus() const {
     std::cout << "Visibility: " << std::fixed << std::setprecision(0) 
               << getVisibilityModifier() * 100 << "%" << std::endl;
     std::cout << "Wind: " << std::fixed << std::setprecision(0) 
-              << windSpeed << " km/h from " << windDirection << "°" << std::endl;
+              << windSpeed << " km/h from " << windDirection << " deg" << std::endl;
     
     auto warnings = getEnvironmentalWarnings();
     if (!warnings.empty()) {
         std::cout << "\nWarnings:" << std::endl;
         for (const auto& warning : warnings) {
-            std::cout << "⚠️  " << warning << std::endl;
+            std::cout << "[!] " << warning << std::endl;
         }
     }
 }

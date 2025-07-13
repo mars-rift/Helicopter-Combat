@@ -4,6 +4,11 @@
 #include <cmath>
 #include <iomanip>
 
+// Define M_PI for Windows compatibility
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 Enemy::Enemy(const std::string& type, int health, int minDamage, int maxDamage)
     : type(type), enemyType(EnemyType::SCOUT_DRONE), health(health), maxHealth(health),
       minDamage(minDamage), maxDamage(maxDamage), position(0, 0, 0, 0),

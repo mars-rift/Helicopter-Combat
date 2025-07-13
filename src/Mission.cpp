@@ -47,6 +47,12 @@ void Mission::generateObjectives() {
             objectives.emplace_back("Respond to danger close calls", false, 7);
             break;
             
+        case MissionType::SUPPLY_DROP:
+            objectives.emplace_back("Deliver supplies to designated area", true, 10);
+            objectives.emplace_back("Avoid enemy detection during delivery", false, 8);
+            objectives.emplace_back("Return to base safely", true, 7);
+            break;
+            
         case MissionType::PATROL:
             objectives.emplace_back("Complete patrol route", true, 8);
             objectives.emplace_back("Report enemy activity", false, 6);
@@ -133,7 +139,7 @@ void Mission::addObjective(const Objective& objective) {
 void Mission::completeObjective(size_t index) {
     if (index < objectives.size()) {
         objectives[index].completed = true;
-        std::cout << "✅ Objective completed: " << objectives[index].description << std::endl;
+        std::cout << "[OK] Objective completed: " << objectives[index].description << std::endl;
     }
 }
 
@@ -197,7 +203,7 @@ void Mission::showMissionStatus() const {
     
     std::cout << "\nObjectives:" << std::endl;
     for (size_t i = 0; i < objectives.size(); ++i) {
-        std::cout << "  " << (objectives[i].completed ? "✅" : "⏳") 
+        std::cout << "  " << (objectives[i].completed ? "[X]" : "[ ]") 
                   << " " << objectives[i].description;
         if (objectives[i].critical) {
             std::cout << " (CRITICAL)";

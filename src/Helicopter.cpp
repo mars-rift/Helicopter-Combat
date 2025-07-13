@@ -2,6 +2,12 @@
 #include <random>
 #include <iomanip>
 #include <cmath>
+
+// Define M_PI for Windows compatibility
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 #include "Helicopter.h"
 
 Helicopter::Helicopter(const std::string& name) 
@@ -177,6 +183,37 @@ void Helicopter::updatePosition(double deltaTime) {
             position.altitude += dalt * ratio;
         }
     }
+    
+    // Update position based on current speed
+    if (flightParams.speed > 0 && destination.x != position.x && destination.y != position.y) {
+        double dx = destination.x - position.x;
+        double dy = destination.y - position.y;
+        double distance = sqrt(dx*dx + dy*dy);
+        
+        if (distance > 0.1) { // 100m threshold
+            double moveDistance = (flightParams.speed / 3600.0) * deltaTime; // km
+            double ratio = std::min(1.0, moveDistance / distance);
+            
+            position.x += dx * ratio;
+            position.y += dy * ratio;
+        }
+    }
+}
+
+// Utility methods for navigation
+double Helicopter::calculateDistance(const EnemyPosition& enemyPos) const {
+    double dx = enemyPos.x - position.x;
+    double dy = enemyPos.y - position.y;
+    return std::sqrt(dx * dx + dy * dy);
+}
+
+double Helicopter::calculateBearing(const EnemyPosition& enemyPos) const {
+    double dx = enemyPos.x - position.x;
+    double dy = enemyPos.y - position.y;
+    double bearing = std::atan2(dy, dx) * 180.0 / M_PI;
+    // Convert to 0-360 range
+    if (bearing < 0) bearing += 360.0;
+    return bearing;
 }
 
 void Helicopter::updateFuel(double deltaTime) {
@@ -266,7 +303,7 @@ void Helicopter::performRadarSweep(const std::vector<Enemy>& enemies, WeatherCon
             
             std::cout << "Contact: " << enemy.getType() 
                       << " at " << std::fixed << std::setprecision(1) << distance 
-                      << "km, bearing " << std::fixed << std::setprecision(0) << bearing << "°" << std::endl;
+                      << "km, bearing " << std::fixed << std::setprecision(0) << bearing << " deg" << std::endl;
             contactsDetected++;
         }
     }
@@ -374,37 +411,37 @@ void Helicopter::performSystemCheck() const {
     bool allSystemsGo = true;
     
     if (!systems.engine || systems.engineHealth < 0.5) {
-        std::cout << "⚠️  ENGINE: Issues detected" << std::endl;
+        std::cout << "[!] ENGINE: Issues detected" << std::endl;
         allSystemsGo = false;
     } else {
-        std::cout << "✅ ENGINE: Operational" << std::endl;
+        std::cout << "[OK] ENGINE: Operational" << std::endl;
     }
     
     if (!systems.mainRotor || systems.rotorHealth < 0.5) {
-        std::cout << "⚠️  ROTOR: Issues detected" << std::endl;
+        std::cout << "[!] ROTOR: Issues detected" << std::endl;
         allSystemsGo = false;
     } else {
-        std::cout << "✅ ROTOR: Operational" << std::endl;
+        std::cout << "[OK] ROTOR: Operational" << std::endl;
     }
     
     if (!systems.radar || systems.radarHealth < 0.5) {
-        std::cout << "⚠️  RADAR: Issues detected" << std::endl;
+        std::cout << "[!] RADAR: Issues detected" << std::endl;
         allSystemsGo = false;
     } else {
-        std::cout << "✅ RADAR: Operational" << std::endl;
+        std::cout << "[OK] RADAR: Operational" << std::endl;
     }
     
     if (flightParams.fuel < 100.0) {
-        std::cout << "⚠️  FUEL: Low" << std::endl;
+        std::cout << "[!] FUEL: Low" << std::endl;
         allSystemsGo = false;
     } else {
-        std::cout << "✅ FUEL: Adequate" << std::endl;
+        std::cout << "[OK] FUEL: Adequate" << std::endl;
     }
     
     if (allSystemsGo) {
-        std::cout << "\n✅ ALL SYSTEMS OPERATIONAL - READY FOR MISSION" << std::endl;
+        std::cout << "\n[OK] ALL SYSTEMS OPERATIONAL - READY FOR MISSION" << std::endl;
     } else {
-        std::cout << "\n⚠️  AIRCRAFT NOT READY - MAINTENANCE REQUIRED" << std::endl;
+        std::cout << "\n[!] AIRCRAFT NOT READY - MAINTENANCE REQUIRED" << std::endl;
     }
 }
 

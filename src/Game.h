@@ -151,4 +151,11 @@ private:
     void showControls();
     std::string formatTime(double seconds) const;
     std::string formatDistance(double km) const;
+    
+    // Movement functions for navigation
+    void moveHelicopter(double deltaX, double deltaY);
+    void moveToContact();
+    void setCustomWaypoint();
+    void changeAltitude();
+    void adjustSpeed();
 };
