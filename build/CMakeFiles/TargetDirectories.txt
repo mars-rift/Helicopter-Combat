@@ -1,3 +1,0 @@
-/workspaces/Helicopter-Combat/build/CMakeFiles/HelicopterCombat.dir
-/workspaces/Helicopter-Combat/build/CMakeFiles/edit_cache.dir
-/workspaces/Helicopter-Combat/build/CMakeFiles/rebuild_cache.dir
