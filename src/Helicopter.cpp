@@ -546,28 +546,28 @@ double Helicopter::getEvasionBonus() const {
 void Helicopter::showTacticalAdvice() const {
     std::cout << "\n=== TACTICAL COMBAT GUIDE ===" << std::endl;
     std::cout << "HELICOPTER ADVANTAGES:" << std::endl;
-    std::cout << "• Mobility - Use speed and altitude to stay out of range" << std::endl;
-    std::cout << "• Standoff weapons - Attack from maximum weapon range" << std::endl;
-    std::cout << "• Terrain masking - Use hills/buildings to break line of sight" << std::endl;
-    std::cout << "• Hit and run - Attack quickly, then retreat and reposition" << std::endl;
+    std::cout << "- Mobility - Use speed and altitude to stay out of range" << std::endl;
+    std::cout << "- Standoff weapons - Attack from maximum weapon range" << std::endl;
+    std::cout << "- Terrain masking - Use hills/buildings to break line of sight" << std::endl;
+    std::cout << "- Hit and run - Attack quickly, then retreat and reposition" << std::endl;
     
     std::cout << "\nCOUNTER-TACTICS BY ENEMY:" << std::endl;
     std::cout << "LIGHT TANKS (Range: 4.5km, Damage: 15-25):" << std::endl;
-    std::cout << "• Attack from >5km with missiles" << std::endl;
-    std::cout << "• Use evasive maneuvers when closing distance" << std::endl;
-    std::cout << "• Deploy flares/chaff if they lock on" << std::endl;
+    std::cout << "- Attack from >5km with missiles" << std::endl;
+    std::cout << "- Use evasive maneuvers when closing distance" << std::endl;
+    std::cout << "- Deploy flares/chaff if they lock on" << std::endl;
     
     std::cout << "\nSAM SITES (Range: 8km, Damage: 25-45):" << std::endl;
-    std::cout << "• Stay at maximum range (8km+) when possible" << std::endl;
-    std::cout << "• Use guided missiles for precision strikes" << std::endl;
-    std::cout << "• Pop countermeasures immediately if detected" << std::endl;
-    std::cout << "• Attack from different angles to confuse targeting" << std::endl;
+    std::cout << "- Stay at maximum range (8km+) when possible" << std::endl;
+    std::cout << "- Use guided missiles for precision strikes" << std::endl;
+    std::cout << "- Pop countermeasures immediately if detected" << std::endl;
+    std::cout << "- Attack from different angles to confuse targeting" << std::endl;
     
     std::cout << "\nDEFENSIVE SYSTEMS:" << std::endl;
-    std::cout << "• Armor: " << std::fixed << std::setprecision(0) << systems.armorRating * 100 << "% damage reduction" << std::endl;
-    std::cout << "• Flares: " << flareCount << " remaining (anti-heat seeking)" << std::endl;
-    std::cout << "• Chaff: " << chaffCount << " remaining (anti-radar)" << std::endl;
-    std::cout << "• Evasion bonus: " << std::fixed << std::setprecision(0) << evasionBonus * 100 << "%" << std::endl;
+    std::cout << "- Armor: " << std::fixed << std::setprecision(0) << systems.armorRating * 100 << "% damage reduction" << std::endl;
+    std::cout << "- Flares: " << flareCount << " remaining (anti-heat seeking)" << std::endl;
+    std::cout << "- Chaff: " << chaffCount << " remaining (anti-radar)" << std::endl;
+    std::cout << "- Evasion bonus: " << std::fixed << std::setprecision(0) << evasionBonus * 100 << "%" << std::endl;
 }
 
 void Helicopter::initializeDefaultWeapons() {
@@ -602,13 +602,43 @@ void Helicopter::initializeDefaultWeapons() {
     rocketSpecs.blastRadius = 15.0;
     rocketSpecs.lockOnTime = 0.0;
     
+    // Air-to-air missile specs (Sidewinder-type)
+    WeaponSpecs aaSpecs;
+    aaSpecs.range = 15.0;
+    aaSpecs.accuracy = 0.88;
+    aaSpecs.reloadTime = 4.0;
+    aaSpecs.penetration = 60.0;
+    aaSpecs.requiresLOS = true;
+    aaSpecs.blastRadius = 8.0;
+    aaSpecs.lockOnTime = 3.0;
+    
+    // Guided missile specs (TOW-type)
+    WeaponSpecs guidedSpecs;
+    guidedSpecs.range = 12.0;
+    guidedSpecs.accuracy = 0.95;
+    guidedSpecs.reloadTime = 5.0;
+    guidedSpecs.penetration = 90.0;
+    guidedSpecs.requiresLOS = true;
+    guidedSpecs.blastRadius = 12.0;
+    guidedSpecs.lockOnTime = 4.0;
+    
+    // Machine gun specs
+    WeaponSpecs mgSpecs;
+    mgSpecs.range = 2.0;
+    mgSpecs.accuracy = 0.8;
+    mgSpecs.reloadTime = 0.5;
+    mgSpecs.penetration = 15.0;
+    mgSpecs.requiresLOS = true;
+    mgSpecs.blastRadius = 0.0;
+    mgSpecs.lockOnTime = 0.0;
+    
     // Add weapons to helicopter
     weapons.emplace_back("M230 Chain Gun", WeaponType::CANNON, 15, 25, 1200, chainGunSpecs);
     weapons.emplace_back("Hellfire Missile", WeaponType::AIR_TO_GROUND_MISSILE, 80, 120, 8, missileSpecs);
     weapons.emplace_back("Hydra 70 Rockets", WeaponType::ROCKET_POD, 35, 55, 38, rocketSpecs);
+    weapons.emplace_back("AIM-9 Sidewinder", WeaponType::AIR_TO_AIR_MISSILE, 55, 85, 4, aaSpecs);
+    weapons.emplace_back("TOW Missile", WeaponType::GUIDED_MISSILE, 90, 130, 6, guidedSpecs);
+    weapons.emplace_back("M134 Minigun", WeaponType::MACHINE_GUN, 8, 15, 2000, mgSpecs);
     
-    std::cout << name << " armed with:\n";
-    std::cout << "• M230 Chain Gun (1200 rounds)\n";
-    std::cout << "• 8x Hellfire Missiles\n";
-    std::cout << "• 38x Hydra 70 Rockets" << std::endl;
+    // Removed automatic weapon display - let user choose when to see weapons
 }

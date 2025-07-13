@@ -26,17 +26,8 @@ void Game::initializeHelicopter() {
 }
 
 void Game::setupDefaultWeapons() {
-    // Enhanced weapons with realistic specifications
-    WeaponSpecs aimSpecs = {15.0, 3.0, 5.0, 0.9, false, 50.0, 10.0};
-    WeaponSpecs rocketSpecs = {8.0, 0.0, 3.0, 0.8, true, 30.0, 15.0};
-    WeaponSpecs gunSpecs = {2.0, 0.0, 1.0, 0.7, true, 15.0, 2.0};
-    WeaponSpecs atmSpecs = {12.0, 2.0, 8.0, 0.85, false, 60.0, 8.0};
-    
-    helicopter.addWeapon(Weapon("AIM-114 Hellfire", WeaponType::AIR_TO_GROUND_MISSILE, 80, 120, 8, atmSpecs));
-    helicopter.addWeapon(Weapon("Hydra 70 Rockets", WeaponType::ROCKET_POD, 25, 45, 38, rocketSpecs));
-    helicopter.addWeapon(Weapon("M230 Chain Gun", WeaponType::CANNON, 12, 28, 1200, gunSpecs));
-    helicopter.addWeapon(Weapon("AIM-9X Sidewinder", WeaponType::AIR_TO_AIR_MISSILE, 60, 100, 4, aimSpecs));
-    
+    // Weapons are now initialized in Helicopter constructor
+    // This prevents duplicate weapons
     generateEnemies(MissionType::SEARCH_AND_DESTROY, 5);
 }
 
