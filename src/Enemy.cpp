@@ -50,8 +50,8 @@ Enemy::Enemy(EnemyType type, const EnemyPosition& pos)
             break;
         case EnemyType::LIGHT_TANK:
             this->type = "Light Tank";
-            health = maxHealth = 100;
-            minDamage = 20; maxDamage = 35;
+            health = maxHealth = 80;
+            minDamage = 15; maxDamage = 25;
             moveSpeed = 40.0;
             break;
         case EnemyType::HEAVY_TANK:
@@ -62,8 +62,8 @@ Enemy::Enemy(EnemyType type, const EnemyPosition& pos)
             break;
         case EnemyType::SAM_SITE:
             this->type = "SAM Site";
-            health = maxHealth = 80;
-            minDamage = 40; maxDamage = 70;
+            health = maxHealth = 60;
+            minDamage = 25; maxDamage = 45;
             moveSpeed = 0.0; // Stationary
             break;
         case EnemyType::FIGHTER_JET:
@@ -111,10 +111,10 @@ void Enemy::initializeCapabilities() {
             capabilities.canMove = true;
             break;
         case EnemyType::LIGHT_TANK:
-            capabilities.detectionRange = 5.0;
-            capabilities.engagementRange = 6.0;
+            capabilities.detectionRange = 4.0;
+            capabilities.engagementRange = 4.5;
             capabilities.maxSpeed = 40.0;
-            capabilities.armor = 0.4;
+            capabilities.armor = 0.3;
             capabilities.hasRadar = false;
             capabilities.isAirborne = false;
             capabilities.canMove = true;
@@ -129,10 +129,10 @@ void Enemy::initializeCapabilities() {
             capabilities.canMove = true;
             break;
         case EnemyType::SAM_SITE:
-            capabilities.detectionRange = 15.0;
-            capabilities.engagementRange = 12.0;
+            capabilities.detectionRange = 10.0;
+            capabilities.engagementRange = 8.0;
             capabilities.maxSpeed = 0.0;
-            capabilities.armor = 0.3;
+            capabilities.armor = 0.2;
             capabilities.hasRadar = true;
             capabilities.isAirborne = false;
             capabilities.canMove = false;
@@ -269,7 +269,7 @@ bool Enemy::canEngageTarget(const EnemyPosition& targetPos) const {
     return distance <= capabilities.engagementRange;
 }
 
-double Enemy::calculateHitProbability(double distance, double targetSpeed) const {
+double Enemy::calculateHitProbability(double distance, double targetSpeed, double evasionBonus) const {
     double hitChance = 0.8; // Base hit chance
     
     // Range factor
@@ -277,6 +277,9 @@ double Enemy::calculateHitProbability(double distance, double targetSpeed) const
     
     // Target speed factor
     hitChance *= (1.0 / (1.0 + targetSpeed / 100.0));
+    
+    // Apply target evasion bonus (countermeasures, evasive maneuvers)
+    hitChance *= (1.0 - evasionBonus);
     
     // Radar bonus for guided systems
     if (capabilities.hasRadar) {

@@ -54,7 +54,7 @@ public:
     // Combat methods
     int attackDamage() const;
     bool canEngageTarget(const EnemyPosition& targetPos) const;
-    double calculateHitProbability(double distance, double targetSpeed) const;
+    double calculateHitProbability(double distance, double targetSpeed, double evasionBonus = 0.0) const;
     void performAttack(const EnemyPosition& targetPos) const;
     
     // AI and movement

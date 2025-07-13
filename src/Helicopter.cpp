@@ -13,7 +13,8 @@
 Helicopter::Helicopter(const std::string& name) 
     : name(name), health(100.0), position(0, 0, 100), 
       radarRange(25.0), visualRange(5.0), stealthFactor(0.3),
-      isHovering(false), timeInMission(0.0) {
+      isHovering(false), timeInMission(0.0), defensiveMode(false),
+      flareCount(30), chaffCount(20), evasionBonus(0.0) {
     
     // Initialize flight parameters
     flightParams.speed = 0.0;
@@ -33,6 +34,10 @@ Helicopter::Helicopter(const std::string& name)
     systems.engineHealth = 1.0;
     systems.rotorHealth = 1.0;
     systems.radarHealth = 1.0;
+    systems.armorRating = 0.25; // 25% damage reduction
+    
+    // Initialize default weapons loadout
+    initializeDefaultWeapons();
 }
 
 Helicopter::Helicopter() : Helicopter("AH-64 Apache") {}
@@ -103,24 +108,28 @@ bool Helicopter::attackWithWeapon(Enemy& target, int weaponIndex, double distanc
 }
 
 void Helicopter::takeDamage(int damage, const std::string& component) {
-    double actualDamage = damage;
+    // Apply armor reduction first
+    double actualDamage = damage * (1.0 - systems.armorRating);
+    
+    std::cout << name << " armor reduces " << damage << " damage to " 
+              << std::fixed << std::setprecision(1) << actualDamage << std::endl;
     
     // Apply damage to specific component
     if (component == "engine") {
-        systems.engineHealth -= damage / 200.0;
+        systems.engineHealth -= actualDamage / 200.0;
         if (systems.engineHealth <= 0) {
             systems.engine = false;
             systems.engineHealth = 0;
             std::cout << "*** ENGINE CRITICAL DAMAGE! ***" << std::endl;
         }
     } else if (component == "rotor") {
-        systems.rotorHealth -= damage / 150.0;
+        systems.rotorHealth -= actualDamage / 150.0;
         if (systems.rotorHealth <= 0.3) {
             flightParams.maneuverability *= 0.5;
             std::cout << "*** ROTOR DAMAGE - Reduced maneuverability! ***" << std::endl;
         }
     } else if (component == "radar") {
-        systems.radarHealth -= damage / 100.0;
+        systems.radarHealth -= actualDamage / 100.0;
         if (systems.radarHealth <= 0) {
             systems.radar = false;
             systems.radarHealth = 0;
@@ -132,7 +141,8 @@ void Helicopter::takeDamage(int damage, const std::string& component) {
     health -= actualDamage;
     if (health < 0) health = 0;
     
-    std::cout << name << " takes " << damage << " damage to " << component 
+    std::cout << name << " takes " << std::fixed << std::setprecision(1) << actualDamage 
+              << " damage to " << component 
               << "! Hull integrity: " << std::fixed << std::setprecision(1) 
               << health << "%" << std::endl;
     
@@ -463,4 +473,142 @@ void Helicopter::attackRandomEnemy(std::vector<Enemy>& enemies) {
         std::cout << enemies[randomIndex].getType() << " was destroyed!" << std::endl;
         enemies.erase(enemies.begin() + randomIndex);
     }
+}
+
+void Helicopter::performEvasiveManeuvers() {
+    if (!canFly() || !systems.mainRotor) {
+        std::cout << "Cannot perform evasive maneuvers - flight systems compromised!" << std::endl;
+        return;
+    }
+    
+    defensiveMode = true;
+    evasionBonus = 0.4 * flightParams.maneuverability; // Up to 40% evasion bonus
+    
+    // Evasive maneuvers consume extra fuel
+    flightParams.fuel -= 10.0;
+    
+    std::cout << name << " performs evasive maneuvers! Evasion increased by " 
+              << std::fixed << std::setprecision(0) << evasionBonus * 100 << "%!" << std::endl;
+}
+
+void Helicopter::deployCountermeasures() {
+    if (flareCount > 0 && chaffCount > 0) {
+        popFlares();
+        dropChaff();
+        std::cout << name << " deploys full countermeasure suite!" << std::endl;
+    } else if (flareCount > 0) {
+        popFlares();
+    } else if (chaffCount > 0) {
+        dropChaff();
+    } else {
+        std::cout << "No countermeasures remaining!" << std::endl;
+    }
+}
+
+void Helicopter::popFlares() {
+    if (flareCount > 0) {
+        flareCount--;
+        evasionBonus += 0.3; // 30% bonus against heat-seeking missiles
+        std::cout << name << " pops flares! Heat-seeking missile defense activated. (" 
+                  << flareCount << " flares remaining)" << std::endl;
+    } else {
+        std::cout << "No flares remaining!" << std::endl;
+    }
+}
+
+void Helicopter::dropChaff() {
+    if (chaffCount > 0) {
+        chaffCount--;
+        evasionBonus += 0.25; // 25% bonus against radar-guided missiles
+        std::cout << name << " drops chaff! Radar-guided missile defense activated. (" 
+                  << chaffCount << " chaff remaining)" << std::endl;
+    } else {
+        std::cout << "No chaff remaining!" << std::endl;
+    }
+}
+
+bool Helicopter::isInDefensiveMode() const {
+    return defensiveMode;
+}
+
+void Helicopter::setDefensiveMode(bool active) {
+    defensiveMode = active;
+    if (!active) {
+        evasionBonus = 0.0;
+        std::cout << name << " exits defensive mode." << std::endl;
+    }
+}
+
+double Helicopter::getEvasionBonus() const {
+    return evasionBonus;
+}
+
+void Helicopter::showTacticalAdvice() const {
+    std::cout << "\n=== TACTICAL COMBAT GUIDE ===" << std::endl;
+    std::cout << "HELICOPTER ADVANTAGES:" << std::endl;
+    std::cout << "• Mobility - Use speed and altitude to stay out of range" << std::endl;
+    std::cout << "• Standoff weapons - Attack from maximum weapon range" << std::endl;
+    std::cout << "• Terrain masking - Use hills/buildings to break line of sight" << std::endl;
+    std::cout << "• Hit and run - Attack quickly, then retreat and reposition" << std::endl;
+    
+    std::cout << "\nCOUNTER-TACTICS BY ENEMY:" << std::endl;
+    std::cout << "LIGHT TANKS (Range: 4.5km, Damage: 15-25):" << std::endl;
+    std::cout << "• Attack from >5km with missiles" << std::endl;
+    std::cout << "• Use evasive maneuvers when closing distance" << std::endl;
+    std::cout << "• Deploy flares/chaff if they lock on" << std::endl;
+    
+    std::cout << "\nSAM SITES (Range: 8km, Damage: 25-45):" << std::endl;
+    std::cout << "• Stay at maximum range (8km+) when possible" << std::endl;
+    std::cout << "• Use guided missiles for precision strikes" << std::endl;
+    std::cout << "• Pop countermeasures immediately if detected" << std::endl;
+    std::cout << "• Attack from different angles to confuse targeting" << std::endl;
+    
+    std::cout << "\nDEFENSIVE SYSTEMS:" << std::endl;
+    std::cout << "• Armor: " << std::fixed << std::setprecision(0) << systems.armorRating * 100 << "% damage reduction" << std::endl;
+    std::cout << "• Flares: " << flareCount << " remaining (anti-heat seeking)" << std::endl;
+    std::cout << "• Chaff: " << chaffCount << " remaining (anti-radar)" << std::endl;
+    std::cout << "• Evasion bonus: " << std::fixed << std::setprecision(0) << evasionBonus * 100 << "%" << std::endl;
+}
+
+void Helicopter::initializeDefaultWeapons() {
+    // Clear any existing weapons
+    weapons.clear();
+    
+    // Add default weapon loadout for combat helicopter
+    WeaponSpecs chainGunSpecs;
+    chainGunSpecs.range = 3.0;
+    chainGunSpecs.accuracy = 0.85;
+    chainGunSpecs.reloadTime = 1.0;
+    chainGunSpecs.penetration = 25.0;
+    chainGunSpecs.requiresLOS = true;
+    chainGunSpecs.blastRadius = 0.0;
+    chainGunSpecs.lockOnTime = 0.0;
+    
+    WeaponSpecs missileSpecs;
+    missileSpecs.range = 8.0;
+    missileSpecs.accuracy = 0.9;
+    missileSpecs.reloadTime = 3.0;
+    missileSpecs.penetration = 80.0;
+    missileSpecs.requiresLOS = true;
+    missileSpecs.blastRadius = 10.0;
+    missileSpecs.lockOnTime = 2.0;
+    
+    WeaponSpecs rocketSpecs;
+    rocketSpecs.range = 5.0;
+    rocketSpecs.accuracy = 0.75;
+    rocketSpecs.reloadTime = 2.0;
+    rocketSpecs.penetration = 50.0;
+    rocketSpecs.requiresLOS = true;
+    rocketSpecs.blastRadius = 15.0;
+    rocketSpecs.lockOnTime = 0.0;
+    
+    // Add weapons to helicopter
+    weapons.emplace_back("M230 Chain Gun", WeaponType::CANNON, 15, 25, 1200, chainGunSpecs);
+    weapons.emplace_back("Hellfire Missile", WeaponType::AIR_TO_GROUND_MISSILE, 80, 120, 8, missileSpecs);
+    weapons.emplace_back("Hydra 70 Rockets", WeaponType::ROCKET_POD, 35, 55, 38, rocketSpecs);
+    
+    std::cout << name << " armed with:\n";
+    std::cout << "• M230 Chain Gun (1200 rounds)\n";
+    std::cout << "• 8x Hellfire Missiles\n";
+    std::cout << "• 38x Hydra 70 Rockets" << std::endl;
 }

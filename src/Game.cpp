@@ -252,10 +252,12 @@ void Game::showInFlightMenu() {
     std::cout << "1. Engage Enemy" << std::endl;
     std::cout << "2. Radar Sweep" << std::endl;
     std::cout << "3. Navigation" << std::endl;
-    std::cout << "4. Systems Check" << std::endl;
-    std::cout << "5. Mission Status" << std::endl;
-    std::cout << "6. Environmental Info" << std::endl;
-    std::cout << "7. Emergency Procedures" << std::endl;
+    std::cout << "4. Evasive Maneuvers" << std::endl;
+    std::cout << "5. Deploy Countermeasures" << std::endl;
+    std::cout << "6. Tactical Advice" << std::endl;
+    std::cout << "7. Systems Check" << std::endl;
+    std::cout << "8. Mission Status" << std::endl;
+    std::cout << "9. Environmental Info" << std::endl;
     std::cout << "0. Return to Base" << std::endl;
     std::cout << "Enter your choice: ";
 }
@@ -265,10 +267,12 @@ void Game::handleInFlightInput(int choice) {
         case 1: engageEnemy(); break;
         case 2: performRadarScan(); break;
         case 3: showNavigationMap(); break;
-        case 4: helicopter.performSystemCheck(); break;
-        case 5: showMissionStatus(); break;
-        case 6: showEnvironmentalStatus(); break;
-        case 7: handleEmergency(); break;
+        case 4: helicopter.performEvasiveManeuvers(); break;
+        case 5: helicopter.deployCountermeasures(); break;
+        case 6: helicopter.showTacticalAdvice(); break;
+        case 7: helicopter.performSystemCheck(); break;
+        case 8: showMissionStatus(); break;
+        case 9: showEnvironmentalStatus(); break;
         case 0: gameState = GameState::MAIN_MENU; break;
         default: std::cout << "Invalid choice." << std::endl; break;
     }

@@ -45,6 +45,7 @@ struct HelicopterSystems {
     double engineHealth;    // 0.0 to 1.0
     double rotorHealth;     // 0.0 to 1.0
     double radarHealth;     // 0.0 to 1.0
+    double armorRating;     // 0.0 to 1.0 damage reduction
 };
 
 class Helicopter {
@@ -84,6 +85,16 @@ public:
     void showDetailedStatus() const;
     void showSystemsStatus() const;
     void performSystemCheck() const;
+    void showTacticalAdvice() const;
+    
+    // Tactical operations
+    void performEvasiveManeuvers();
+    void deployCountermeasures();
+    void popFlares();
+    void dropChaff();
+    bool isInDefensiveMode() const;
+    void setDefensiveMode(bool active);
+    double getEvasionBonus() const;
     
     // Getters
     const Position& getPosition() const { return position; }
@@ -100,6 +111,7 @@ public:
     // Utility methods for navigation
     double calculateDistance(const EnemyPosition& enemyPos) const;
     double calculateBearing(const EnemyPosition& enemyPos) const;
+    void initializeDefaultWeapons();
 
 private:
     // Core attributes
@@ -118,7 +130,13 @@ private:
     
     // Mission parameters
     bool isHovering;
+    bool defensiveMode;
     double timeInMission;   // minutes
+    
+    // Countermeasures
+    int flareCount;
+    int chaffCount;
+    double evasionBonus;
     
     // Private helper methods
     void updateFuel(double deltaTime);
